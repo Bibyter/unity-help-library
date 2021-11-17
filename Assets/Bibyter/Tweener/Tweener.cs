@@ -6,7 +6,7 @@ namespace Bibyter
 {
     public static class Tweener
     {
-        public static IEnumerator JumpToTransformTween(Transform transform, Transform target, Vector3 targetOffset, float duration, System.Action onComplete)
+        public static IEnumerator JumpToTransformTween(Transform transform, Transform target, Vector3 targetOffset, float height, float duration, System.Action onComplete)
         {
             float time = 0f;
             var curve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -16,7 +16,7 @@ namespace Bibyter
             {
                 time += Time.deltaTime / duration;
 
-                transform.position = Vector3.Lerp(startPosition, target.TransformPoint(targetOffset), curve.Evaluate(time)) + new Vector3(0f, Mathf.Sin(time * Mathf.PI), 0f);
+                transform.position = Vector3.Lerp(startPosition, target.TransformPoint(targetOffset), curve.Evaluate(time)) + new Vector3(0f, Mathf.Sin(time * Mathf.PI) * height, 0f);
 
                 yield return null;
             }
