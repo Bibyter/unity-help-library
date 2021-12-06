@@ -1,32 +1,46 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Bibyter
 {
     [DefaultExecutionOrder(-1000)]
-    public sealed class TouchInput : MonoBehaviour
+    public sealed class TouchInput : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
+        public bool isDragged { private set; get; }
         public Vector2 percentSwipeDelta { private set; get; }
 
-        Vector2 _prevMousePosition;
+        Vector2 _delta;
 
         private void OnEnable()
         {
-            _prevMousePosition = Input.mousePosition;
+            percentSwipeDelta = Vector2.zero;
+            isDragged = false;
         }
 
         private void Update()
         {
-            var mousePosition = (Vector2)Input.mousePosition;
-            var canSetSwipe = Input.GetMouseButton(0) && !Input.GetMouseButtonDown(0);
-
-            percentSwipeDelta = canSetSwipe ? (mousePosition - _prevMousePosition) / GetScreenMinSide() : Vector2.zero;
-
-            _prevMousePosition = mousePosition;
+            percentSwipeDelta = _delta / GetScreenMinSide();
+            _delta = Vector2.zero;
         }
 
         private int GetScreenMinSide()
         {
             return Mathf.Min(Screen.width, Screen.height);
+        }
+
+        void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
+        {
+            isDragged = true;
+        }
+
+        void IEndDragHandler.OnEndDrag(PointerEventData eventData)
+        {
+            isDragged = false;
+        }
+
+        void IDragHandler.OnDrag(PointerEventData eventData)
+        {
+            _delta += eventData.delta;
         }
     }
 }
