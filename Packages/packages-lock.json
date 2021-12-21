@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.mackysoft.serializereference-extensions": {
+      "version": "https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git?path=Assets/MackySoft/MackySoft.SerializeReferenceExtensions",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "ef305d06fe799d43cb38c96ccc18bb585803b5e1"
+    },
     "com.unity.collab-proxy": {
       "version": "1.7.1",
       "depth": 0,
