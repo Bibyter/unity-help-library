@@ -12,9 +12,14 @@ namespace Bibyter.Fsm2
 
         State _currentChildState;
         float _enterTime;
+        bool _deferredSetState;
+        string _deferredSetStateName;
+        int _enterBehavioursCount;
 
         public void Awake2(IInjector injector)
         {
+            _deferredSetStateName = null;
+
             for (int i = 0; i < _behaviours.Length; i++)
             {
                 _behaviours[i].state = this;
@@ -29,10 +34,25 @@ namespace Bibyter.Fsm2
 
         public void Enter()
         {
+            _deferredSetState = true;
+            _deferredSetStateName = null;
+            _enterBehavioursCount = 0;
+
             for (int i = 0; i < _behaviours.Length; i++)
             {
                 _behaviours[i].Enter();
+                _enterBehavioursCount++;
+
+                if (_deferredSetStateName != null)
+                {
+                    _deferredSetState = false;
+                    SetState(_deferredSetStateName);
+                    _deferredSetStateName = null;
+                    return;
+                }
             }
+
+            _deferredSetState = false;
 
             _enterTime = Time.time;
 
@@ -42,7 +62,7 @@ namespace Bibyter.Fsm2
 
         public void Exit()
         {
-            for (int i = 0; i < _behaviours.Length; i++)
+            for (int i = 0; i < _enterBehavioursCount; i++)
             {
                 _behaviours[i].Exit();
             }
@@ -70,11 +90,18 @@ namespace Bibyter.Fsm2
 
         public void SetState(string name)
         {
-            for (int i = 0; i < _childStates.Length; i++)
+            if (_deferredSetState)
             {
-                if (_childStates[i].name == name)
+                _deferredSetStateName = name;
+            }
+            else
+            {
+                for (int i = 0; i < _childStates.Length; i++)
                 {
-                    SetChildState(i);
+                    if (_childStates[i].name == name)
+                    {
+                        SetChildState(i);
+                    }
                 }
             }
         }
@@ -111,6 +138,36 @@ namespace Bibyter.Fsm2
             for (int i = 0; i < _childStates.Length; i++)
             {
                 _childStates[i] = _childStates[i].Clone();
+            }
+        }
+
+        public void InvokeEvent<T>(ref T data)
+        {
+            _deferredSetState = true;
+            _deferredSetStateName = null;
+
+            for (int i = 0; i < _behaviours.Length; i++)
+            {
+                if (_behaviours[i] is IEventHandler<T> handler)
+                {
+                    handler.OnEvent(data);
+
+                    if (_deferredSetStateName != null)
+                    {
+                        _deferredSetState = false;
+                        SetState(_deferredSetStateName);
+                        _deferredSetStateName = null;
+                        return;
+                    }
+
+                }
+            }
+
+            _deferredSetState = false;
+
+            if (_currentChildState != null)
+            {
+                _currentChildState.InvokeEvent(ref data);
             }
         }
 
@@ -172,5 +229,10 @@ namespace Bibyter.Fsm2
         public virtual void Enter() { }
         public virtual void Exit() { }
         public virtual void Update() { }
+    }
+
+    public interface IEventHandler<T>
+    {
+        void OnEvent(T data);
     }
 }
