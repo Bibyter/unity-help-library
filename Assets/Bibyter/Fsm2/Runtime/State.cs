@@ -9,16 +9,16 @@ namespace Bibyter.Fsm2
     {
         [SerializeField, SerializeReference] StateBehaviour[] _behaviours;
         [SerializeField] State[] _childStates;
+        [SerializeField] State _parentState;
 
         State _currentChildState;
         float _enterTime;
-        bool _deferredSetState;
-        string _deferredSetStateName;
+        string _deferredSetState;
         int _enterBehavioursCount;
 
         public void Awake2(IInjector injector)
         {
-            _deferredSetStateName = null;
+            _deferredSetState = null;
 
             for (int i = 0; i < _behaviours.Length; i++)
             {
@@ -34,8 +34,6 @@ namespace Bibyter.Fsm2
 
         public void Enter()
         {
-            _deferredSetState = true;
-            _deferredSetStateName = null;
             _enterBehavioursCount = 0;
 
             for (int i = 0; i < _behaviours.Length; i++)
@@ -43,16 +41,13 @@ namespace Bibyter.Fsm2
                 _behaviours[i].Enter();
                 _enterBehavioursCount++;
 
-                if (_deferredSetStateName != null)
+                if (_deferredSetState != null)
                 {
-                    _deferredSetState = false;
-                    SetState(_deferredSetStateName);
-                    _deferredSetStateName = null;
+                    _parentState.SetState(_deferredSetState);
+                    _deferredSetState = null;
                     return;
                 }
             }
-
-            _deferredSetState = false;
 
             _enterTime = Time.time;
 
@@ -80,6 +75,13 @@ namespace Bibyter.Fsm2
             for (int i = 0; i < _behaviours.Length; i++)
             {
                 _behaviours[i].Update();
+
+                if (_deferredSetState != null)
+                {
+                    _parentState.SetState(_deferredSetState);
+                    _deferredSetState = null;
+                    return;
+                }
             }
 
             if (_currentChildState != null)
@@ -90,20 +92,26 @@ namespace Bibyter.Fsm2
 
         public void SetState(string name)
         {
-            if (_deferredSetState)
+            SetChildStateInstantly(name);
+        }
+
+        public void SetStateOfBehaviour(string name)
+        {
+            _deferredSetState = name;
+        }
+
+        void SetChildStateInstantly(string name)
+        {
+            for (int i = 0; i < _childStates.Length; i++)
             {
-                _deferredSetStateName = name;
-            }
-            else
-            {
-                for (int i = 0; i < _childStates.Length; i++)
+                if (_childStates[i].name == name)
                 {
-                    if (_childStates[i].name == name)
-                    {
-                        SetChildState(i);
-                    }
+                    SetChildState(i);
+                    return;
                 }
             }
+
+            Debug.LogWarning($"Not Find Child State {name} of {this.name} State");
         }
 
         public float GetActiveTime()
@@ -122,13 +130,22 @@ namespace Bibyter.Fsm2
             if (id >= 0 && id < _childStates.Length)
             {
                 _currentChildState = _childStates[id];
+
+                _deferredSetState = null;
                 _currentChildState.Enter();
             }
         }
 
         public State Clone()
         {
+            return Clone(null);
+        }
+
+        State Clone(State parent)
+        {
             var instance = Instantiate(this);
+            instance.name = this.name;
+            instance._parentState = parent;
             instance.ChildStatesClone();
             return instance;
         }
@@ -137,14 +154,13 @@ namespace Bibyter.Fsm2
         {
             for (int i = 0; i < _childStates.Length; i++)
             {
-                _childStates[i] = _childStates[i].Clone();
+                _childStates[i] = _childStates[i].Clone(this);
             }
         }
 
         public void InvokeEvent<T>(ref T data)
         {
-            _deferredSetState = true;
-            _deferredSetStateName = null;
+            _deferredSetState = null;
 
             for (int i = 0; i < _behaviours.Length; i++)
             {
@@ -152,18 +168,15 @@ namespace Bibyter.Fsm2
                 {
                     handler.OnEvent(data);
 
-                    if (_deferredSetStateName != null)
+                    if (_deferredSetState != null)
                     {
-                        _deferredSetState = false;
-                        SetState(_deferredSetStateName);
-                        _deferredSetStateName = null;
+                        //SetStateInstantly(_deferredSetStateName);
+                        _deferredSetState = null;
                         return;
                     }
 
                 }
             }
-
-            _deferredSetState = false;
 
             if (_currentChildState != null)
             {
@@ -207,6 +220,12 @@ namespace Bibyter.Fsm2
                 System.Array.Resize(ref _childStates, _childStates.Length - 1);
             }
         }
+
+        public State parentState
+        {
+            set => _parentState = value;
+            get => _parentState;
+        }
 #endif
     }
 
@@ -217,7 +236,7 @@ namespace Bibyter.Fsm2
 
         public void SetState(string name)
         {
-            state.SetState(name);
+            state.SetStateOfBehaviour(name);
         }
 
         public float GetStateTime()

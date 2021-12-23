@@ -16,6 +16,12 @@ namespace Bibyter.Fsm2
         {
             var state = target as State;
 
+            if (state.parentState == null)
+            {
+                // dont draw root node
+                return;
+            }
+
             serializedObject.Update();
 
             var behaviours = serializedObject.FindProperty("_behaviours");

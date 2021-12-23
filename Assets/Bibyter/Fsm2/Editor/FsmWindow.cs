@@ -186,7 +186,7 @@ namespace Bibyter.Fsm2
 
             for (int i = 0; i < state.GetChildStatesCount(); i++)
             {
-                _nodeWindow.AddNode(NodeFabric_Create(state.GetChildState(i), StateHierarchy_GetCurrent()));
+                _nodeWindow.AddNode(NodeFabric_Create(state.GetChildState(i), StateHierarchy_GetCurrentState()));
             }
         }
 
@@ -207,12 +207,12 @@ namespace Bibyter.Fsm2
 
                 for (int i = 0; i < currentState.GetChildStatesCount(); i++)
                 {
-                    _nodeWindow.AddNode(NodeFabric_Create(currentState.GetChildState(i), StateHierarchy_GetCurrent()));
+                    _nodeWindow.AddNode(NodeFabric_Create(currentState.GetChildState(i), StateHierarchy_GetCurrentState()));
                 }
             }
         }
 
-        State StateHierarchy_GetCurrent()
+        State StateHierarchy_GetCurrentState()
         {
             return _stateHierarchy.Peek();
         }
@@ -237,6 +237,7 @@ namespace Bibyter.Fsm2
             newState.name = "New State";
             newState.position = position;
             newState.hideFlags = HideFlags.HideInHierarchy;
+            newState.parentState = StateHierarchy_GetCurrentState();
 
             Selection.activeObject = newState;
 
@@ -244,8 +245,8 @@ namespace Bibyter.Fsm2
             EditorUtility.SetDirty(_stateAsset);
             AssetDatabase.SaveAssetIfDirty(_stateAsset);
 
-            StateHierarchy_GetCurrent().AddChildState(newState);
-            _nodeWindow.AddNode(NodeFabric_Create(newState, StateHierarchy_GetCurrent()));
+            StateHierarchy_GetCurrentState().AddChildState(newState);
+            _nodeWindow.AddNode(NodeFabric_Create(newState, StateHierarchy_GetCurrentState()));
         }
 
         void DeleteState(Node node)
@@ -253,7 +254,7 @@ namespace Bibyter.Fsm2
             var stateClickNode = node as StateNode;
             var deletedState = stateClickNode.state;
 
-            StateHierarchy_GetCurrent().DelChildState(deletedState);
+            StateHierarchy_GetCurrentState().DelChildState(deletedState);
             AssetDatabase.RemoveObjectFromAsset(deletedState);
 
             _nodeWindow.DeleteNode(node);
@@ -265,7 +266,7 @@ namespace Bibyter.Fsm2
 
         void SetEntryState(Node node)
         {
-            var parentState = StateHierarchy_GetCurrent();
+            var parentState = StateHierarchy_GetCurrentState();
             parentState.ChildStatesFlip((node as StateNode).state, parentState.GetChildState(0));
 
             EditorUtility.SetDirty(_stateAsset);
@@ -349,8 +350,6 @@ namespace Bibyter.Fsm2
 
 
         public State state => _state;
-
-
 
         public StateNode(State parent, State state) : base()
         {

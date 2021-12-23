@@ -10,7 +10,12 @@ namespace Bibyter.Fsm2.Example
 
         private void Awake()
         {
-            _fsmController.Awake(GetComponent<IInjector>());
+            var injector = GetComponent<IInjector>();
+            var linkRegistrator = GetComponent<SharedObject>();
+
+            linkRegistrator.AddInterLink(transform);
+
+            _fsmController.Awake(injector);
         }
 
         private void OnEnable()
