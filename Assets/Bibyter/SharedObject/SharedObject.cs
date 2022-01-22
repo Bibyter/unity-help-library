@@ -20,35 +20,56 @@ public sealed class SharedObject : MonoBehaviour, IInjector
     #endregion
 
     #region
-    List<System.Object> _cachedRuntimeInternalLinks;
+    [System.Serializable]
+    public struct ValueVar
+    {
+        public string name;
+        [SerializeReference] public System.Object var;
+    }
+
+    [System.Serializable]
+    public struct ReferenceVar
+    {
+        public string name;
+        [SerializeReference] public UnityEngine.Object var;
+    }
+
+    [SerializeField] ValueVar[] _valueVars;
+    [SerializeField] ReferenceVar[] _referenceVars;
 
     public T GetInternalLink<T>() where T : class
     {
-        if (_cachedRuntimeInternalLinks == null)
-            _cachedRuntimeInternalLinks = new List<object>();
-
-        for (int i = 0; i < _cachedRuntimeInternalLinks.Count; i++)
-        {
-            if (_cachedRuntimeInternalLinks[i] is T)
-                return _cachedRuntimeInternalLinks[i] as T;
-        }
-
-        if (!typeof(T).IsSubclassOf(typeof(UnityEngine.Object)))
-        {
-            var instance = System.Activator.CreateInstance<T>();
-            _cachedRuntimeInternalLinks.Add(instance);
-            return instance;
-        }
-
-        throw new System.Exception($"SharedObject.GetInternalLink(NotFindLink {typeof(T).FullName})");
+        return GetInternalLink<T>(null);
     }
 
+    public T GetInternalLink<T>(string name) where T : class
+    {
+        bool hasName = !string.IsNullOrEmpty(name);
+
+        if (typeof(T).IsSubclassOf(typeof(UnityEngine.Object)))
+        {
+            for (int i = 0; i < _referenceVars.Length; i++)
+            {
+                if (_referenceVars[i].var is T && (!hasName || _referenceVars[i].name == name))
+                    return _referenceVars[i].var as T;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < _valueVars.Length; i++)
+            {
+                if (_valueVars[i].var is T && (!hasName || _valueVars[i].name == name))
+                    return _valueVars[i].var as T;
+            }
+        }
+
+        throw new System.Exception($"SharedObject.GetInternalLink(NotFoundLink, Type={typeof(T).Name}, Name={name})");
+    }
+
+    [System.Obsolete]
     public void AddInterLink(System.Object obj)
     {
-        if (_cachedRuntimeInternalLinks == null)
-            _cachedRuntimeInternalLinks = new List<object>();
-
-        _cachedRuntimeInternalLinks.Add(obj);
+        throw new System.Exception("SharedObject.AddInterLink(NotImplemention)");
     }
     #endregion
 
@@ -99,6 +120,7 @@ public interface IInjector
     T GetExternalLink<T>() where T : class;
     T GetExternalLink<T>(string name) where T : class;
     T GetInternalLink<T>() where T : class;
+    T GetInternalLink<T>(string name) where T : class;
 
     OrderableEvent<T> GetExternalEvent<T>();
     OrderableEvent<T> GetInternalEvent<T>();

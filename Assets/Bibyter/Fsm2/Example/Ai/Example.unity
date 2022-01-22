@@ -169,15 +169,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4e3d51ee050cab4bbb9e6dc0eafec78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 1800339121}
-  _navMeshAgent: {fileID: 223154313}
   _fsmController:
     _attachedFsmAsset: {fileID: 11400000, guid: eede33da98f7c534d865d026f68646e1, type: 2}
-  _aiData:
-    actionState: 0
-    destination: {x: 0, y: 0, z: 0}
-    pursuitStopDistance: 1
-    attackDistance: 1.1
+  _stringLocalVariable:
+    _name: default-name
+    _localValue: asd
+  intLocalVariable:
+    _name: 
+    _localValue: 234
+  floatLocalVariable:
+    _name: default-name
+    _localValue: 234.11
 --- !u!114 &223154312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,6 +192,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bcc6c181029bfa439b6b41163a539db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _valueVars:
+  - name: default-name
+    var:
+      id: 0
+  - name: anim-walk
+    var:
+      id: 1
+  _referenceVars:
+  - name: default-name
+    var: {fileID: 1800339121}
+  - name: default-name
+    var: {fileID: 223154313}
+  references:
+    version: 1
+    00000000:
+      type: {class: AiData, ns: Bibyter.Fsm2.Behaviours.Ai, asm: Assembly-CSharp}
+      data:
+        actionState: 0
+        destination: {x: 0, y: 0, z: 0}
+        pursuitStopDistance: 1
+        attackDistance: 1.1
+    00000001:
+      type: {class: StringVariable, ns: SharedObjectNs.BaseVariables, asm: Assembly-CSharp}
+      data:
+        value: idle
 --- !u!195 &223154313
 NavMeshAgent:
   m_ObjectHideFlags: 0

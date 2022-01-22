@@ -8,18 +8,16 @@ namespace Bibyter.Fsm2.Ai
 {
     public sealed class Bot : MonoBehaviour
     {
-        [SerializeField] Animator _animator;
-        [SerializeField] NavMeshAgent _navMeshAgent;
-
         [SerializeField] FsmController _fsmController;
-        [SerializeField] AiData _aiData;
 
+        [SerializeField]
+        SharedObjectNs.BaseVariables.StringLocalVariable _stringLocalVariable;
+
+        public SharedObjectNs.BaseVariables.IntLocalVariable intLocalVariable;
+        public SharedObjectNs.BaseVariables.FloatLocalVariable floatLocalVariable;
 
         private void Awake()
         {
-            GetComponent<SharedObject>().AddInterLink(_animator);
-            GetComponent<SharedObject>().AddInterLink(_aiData);
-            GetComponent<SharedObject>().AddInterLink(_navMeshAgent);
             _fsmController.Awake(GetComponent<IInjector>());
         }
 

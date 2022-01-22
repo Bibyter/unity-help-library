@@ -81,7 +81,7 @@ namespace Bibyter
             onComplete?.Invoke();
         }
 
-        public static IEnumerator MoveToPoint(Transform transform, Vector3 point, float duration, System.Action onComplete)
+        public static IEnumerator MoveToPoint(Transform transform, Vector3 point, float duration, EaseMethod easeMethod, System.Action onComplete)
         {
             float time = 0f;
             var startPosition = transform.position;
@@ -89,7 +89,7 @@ namespace Bibyter
             while(time <= 1f)
             {
                 time += Time.deltaTime / duration;
-                transform.position = Vector3.Lerp(startPosition, point, InOutQuad(time));
+                transform.position = Vector3.Lerp(startPosition, point, EaseFunction(easeMethod, time));
                 yield return null;
             }
 
@@ -116,6 +116,18 @@ namespace Bibyter
             }
 
             onComplete?.Invoke();
+        }
+
+        public enum EaseMethod { Linear, InOutQuad }
+
+        public static float EaseFunction(EaseMethod method, float value)
+        {
+            switch (method)
+            {
+                case EaseMethod.Linear: return value;
+                case EaseMethod.InOutQuad: return InOutQuad(value);
+                default: return value;
+            }
         }
 
         public static float InOutQuad(float value)

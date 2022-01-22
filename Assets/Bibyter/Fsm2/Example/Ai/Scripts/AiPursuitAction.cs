@@ -73,7 +73,7 @@ namespace Bibyter.Fsm2.Behaviours.Ai
 
     public enum AiActionState { None, Run, Failed, Complete }
 
-    [System.Serializable]
+    [System.Serializable, SharedVariable]
     public sealed class AiData
     {
         public AiActionState actionState;
