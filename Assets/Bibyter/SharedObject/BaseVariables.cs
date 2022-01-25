@@ -22,6 +22,12 @@ namespace SharedObjectNs.BaseVariables
     {
         public float value;
     }
+
+    [System.Serializable, SharedVariable]
+    public sealed class BoolVariable
+    {
+        public bool value;
+    }
 }
 
 namespace SharedObjectNs.BaseVariables
@@ -36,7 +42,7 @@ namespace SharedObjectNs.BaseVariables
 
         public void Awake(IInjector injector)
         {
-            _variable = !string.IsNullOrEmpty(_name) ? injector.GetInternalLink<StringVariable>() : null;
+            _variable = !string.IsNullOrEmpty(_name) ? injector.GetInternalLink<StringVariable>(_name) : null;
         }
 
         public string value
@@ -62,7 +68,7 @@ namespace SharedObjectNs.BaseVariables
 
         public void Awake(IInjector injector)
         {
-            _variable = !string.IsNullOrEmpty(_name) ? injector.GetInternalLink<IntVariable>() : null;
+            _variable = !string.IsNullOrEmpty(_name) ? injector.GetInternalLink<IntVariable>(_name) : null;
         }
 
         public int value
@@ -88,7 +94,7 @@ namespace SharedObjectNs.BaseVariables
 
         public void Awake(IInjector injector)
         {
-            _variable = !string.IsNullOrEmpty(_name) ? injector.GetInternalLink<FloatVariable>() : null;
+            _variable = !string.IsNullOrEmpty(_name) ? injector.GetInternalLink<FloatVariable>(_name) : null;
         }
 
         public float value
@@ -101,6 +107,32 @@ namespace SharedObjectNs.BaseVariables
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(FloatLocalVariable))]
     public sealed class FloatLocalVariableDrawer : Editor.LocalVariableDrawer { }
+#endif
+    #endregion
+
+    #region
+    [System.Serializable]
+    public struct BoolLocalVariable
+    {
+        [SerializeField] string _name;
+        [SerializeField] bool _localValue;
+        BoolVariable _variable;
+
+        public void Awake(IInjector injector)
+        {
+            _variable = !string.IsNullOrEmpty(_name) ? injector.GetInternalLink<BoolVariable>(_name) : null;
+        }
+
+        public bool value
+        {
+            get { return _variable != null ? _variable.value : _localValue; }
+            set { if (_variable != null) { _variable.value = value; } else { _localValue = value; } }
+        }
+    }
+
+#if UNITY_EDITOR
+    [CustomPropertyDrawer(typeof(FloatLocalVariable))]
+    public sealed class BoolLocalVariableDrawer : Editor.LocalVariableDrawer { }
 #endif
     #endregion
 }

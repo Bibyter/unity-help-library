@@ -36,7 +36,7 @@ namespace SharedObjectNs.Editor
             p.width = EditorGUIUtility.labelWidth;
             nameProperty.stringValue = EditorGUI2.RemaneField(p, Event.current, nameProperty.stringValue, controlID);
 
-            if (EditorGUI.DropdownButton(GetDropdownButtonPosition(position), GetTypeName(varProperty), FocusType.Keyboard))
+            if (EditorGUI2.TypeField(GetDropdownButtonPosition(position), Event.current, GetTypeName(varProperty)))
             {
                 _dropdown.property = varProperty;
                 _dropdown.Show(GetDropdownButtonPosition(position));
@@ -58,16 +58,16 @@ namespace SharedObjectNs.Editor
 
         }
 
-        GUIContent GetTypeName(SerializedProperty property)
+        string GetTypeName(SerializedProperty property)
         {
             if (string.IsNullOrEmpty(property.managedReferenceFullTypename))
             {
-                return new GUIContent("null");
+                return "null";
             }
 
             var text = property.type;
             text = property.type.Substring(17, text.Length - 18);
-            return new GUIContent(text);
+            return text;
         }
 
         Rect GetDropdownButtonPosition(in Rect position)
@@ -131,7 +131,6 @@ namespace SharedObjectNs.Editor
     {
         static int _editControlId = 0;
 
-
         public static string RemaneField(Rect position, Event e, string name, int keyControlId)
         {
             bool isRenameState = keyControlId == _editControlId;
@@ -140,11 +139,11 @@ namespace SharedObjectNs.Editor
             {
                 EditorGUI.BeginChangeCheck();
 
-                var r = EditorGUI.DelayedTextField(position, name);
+                var textFieldString = EditorGUI.DelayedTextField(position, name);
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    name = r;
+                    name = textFieldString;
                     _editControlId = 0;
                 }
                 else if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
@@ -184,6 +183,23 @@ namespace SharedObjectNs.Editor
             }
 
             return name;
+        }
+
+        public static bool TypeField(Rect position, Event e, string text)
+        {
+            EditorGUI.LabelField(position, text);
+
+            if (e.type == EventType.MouseDown && position.Contains(e.mousePosition))
+            {
+                e.Use();
+
+                if (e.clickCount == 2)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
