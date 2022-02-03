@@ -4,22 +4,22 @@ using UnityEngine.EventSystems;
 namespace Bibyter
 {
     [DefaultExecutionOrder(-1000)]
-    public sealed class TouchInput : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+    public sealed class SwipeInput : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
-        public bool isDragged { private set; get; }
-        public Vector2 percentSwipeDelta { private set; get; }
+        public bool isPressed { private set; get; }
+        public Vector2 direction { private set; get; }
 
         Vector2 _delta;
 
         private void OnEnable()
         {
-            percentSwipeDelta = Vector2.zero;
-            isDragged = false;
+            direction = Vector2.zero;
+            isPressed = false;
         }
 
         private void Update()
         {
-            percentSwipeDelta = _delta / GetScreenMinSide();
+            direction = _delta / GetScreenMinSide();
             _delta = Vector2.zero;
         }
 
@@ -30,12 +30,12 @@ namespace Bibyter
 
         void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
         {
-            isDragged = true;
+            isPressed = true;
         }
 
         void IEndDragHandler.OnEndDrag(PointerEventData eventData)
         {
-            isDragged = false;
+            isPressed = false;
         }
 
         void IDragHandler.OnDrag(PointerEventData eventData)
