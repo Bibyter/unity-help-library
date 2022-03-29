@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SharedObjectNs.Editor
 {
-    [CustomPropertyDrawer(typeof(SharedObject.ValueVar))]
+    [CustomPropertyDrawer(typeof(InjectionNode.ValueVar))]
     public class ValueVarDrawer : PropertyDrawer
     {
         Dropdown _dropdown;

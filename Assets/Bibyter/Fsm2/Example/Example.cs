@@ -11,7 +11,7 @@ namespace Bibyter.Fsm2.Example
         private void Awake()
         {
             var injector = GetComponent<IInjector>();
-            var linkRegistrator = GetComponent<SharedObject>();
+            var linkRegistrator = GetComponent<InjectionNode>();
 
             linkRegistrator.AddInterLink(transform);
 

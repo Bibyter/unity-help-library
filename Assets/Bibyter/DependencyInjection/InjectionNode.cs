@@ -1,11 +1,11 @@
-﻿using Bibyter;
+﻿using Bibyter.DependencyInjection;
 using Bibyter.CustomEvent;
 using System.Collections.Generic;
 using UnityEngine;
 
 
 [DefaultExecutionOrder(-100)]
-public sealed class SharedObject : MonoBehaviour, IInjector
+public sealed class InjectionNode : MonoBehaviour, IInjector
 {
     #region
     public T GetExternalLink<T>() where T : class

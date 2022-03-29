@@ -81,15 +81,63 @@ namespace Bibyter
             onComplete?.Invoke();
         }
 
-        public static IEnumerator MoveToPoint(Transform transform, Vector3 point, float duration, EaseMethod easeMethod, System.Action onComplete)
+        #region IPosition
+        public interface IPosition
+        {
+            Vector3 Get();
+            void Set(in Vector3 value);
+        }
+
+        public sealed class TransformPosition : IPosition
+        {
+            Transform _transform;
+
+            public TransformPosition(Transform transform)
+            {
+                _transform = transform;
+            }
+
+            Vector3 IPosition.Get()
+            {
+                return _transform.position;
+            }
+
+            void IPosition.Set(in Vector3 value)
+            {
+                _transform.position = value;
+            }
+        }
+
+        public sealed class TransformLocalPosition : IPosition
+        {
+            Transform _transform;
+
+            public TransformLocalPosition(Transform transform)
+            {
+                _transform = transform;
+            }
+
+            Vector3 IPosition.Get()
+            {
+                return _transform.localPosition;
+            }
+
+            void IPosition.Set(in Vector3 value)
+            {
+                _transform.localPosition = value;
+            }
+        }
+        #endregion
+
+        public static IEnumerator MoveToPoint(IPosition position, Vector3 point, float duration, EaseMethod easeMethod, System.Action onComplete)
         {
             float time = 0f;
-            var startPosition = transform.position;
+            var startPosition = position.Get();
 
             while(time <= 1f)
             {
                 time += Time.deltaTime / duration;
-                transform.position = Vector3.Lerp(startPosition, point, EaseFunction(easeMethod, time));
+                position.Set(Vector3.Lerp(startPosition, point, EaseFunction(easeMethod, time)));
                 yield return null;
             }
 
@@ -118,7 +166,44 @@ namespace Bibyter
             onComplete?.Invoke();
         }
 
-        public enum EaseMethod { Linear, InOutQuad }
+        public static IEnumerator Bounce(Transform transform, float toScale, float bounceForce, float duration, EaseMethod easeMethod, System.Action onComplete)
+        {
+            float time = 0f;
+            Vector3 startScale = transform.localScale;
+            Vector3 targetScale = Vector3.one * toScale;
+
+            while (time <= 1f)
+            {
+                time += Time.deltaTime / duration;
+                float easeTime = EaseFunction(easeMethod, time);
+                transform.localScale = Vector3.Lerp(startScale, targetScale, easeTime) + (Mathf.Sin(easeTime * Mathf.PI) * bounceForce * Vector3.one);
+                yield return null;
+            }
+
+            onComplete?.Invoke();
+        }
+
+        public static IEnumerator GravityTween(Transform transform, Vector3 targetPoint, Vector3 gravity, float duration, System.Action onComplete)
+        {
+            float time = 0f;
+            Vector3 startPosition = transform.position;
+
+            while(time <= 1f)
+            {
+                time += Time.deltaTime / duration;
+                transform.position = LerpTrajectory(startPosition, targetPoint, gravity, duration, time);
+                yield return null;
+            }
+
+            onComplete?.Invoke();
+        }
+
+        public static Vector3 LerpTrajectory(in Vector3 from, in Vector3 to, in Vector3 gravity, float duration, float t)
+        {
+            return from + ((to - from - (gravity * duration * duration * 0.5f)) / duration) * t + (gravity * t * t * 0.5f);
+        }
+
+        public enum EaseMethod { Linear, InOutQuad, OutQuad, InQuad }
 
         public static float EaseFunction(EaseMethod method, float value)
         {
@@ -126,16 +211,25 @@ namespace Bibyter
             {
                 case EaseMethod.Linear: return value;
                 case EaseMethod.InOutQuad: return InOutQuad(value);
+                case EaseMethod.InQuad: return InQuad(value);
+                case EaseMethod.OutQuad: return OutQuad(value);
                 default: return value;
             }
         }
 
-        public static float InOutQuad(float value)
+        private static float InQuad(float time)
         {
-            value *= 2f;
-            if (value < 1f) return 1f / 2f * value * value;
-            value--;
-            return -1f / 2f * (value * (value - 2f) - 1f);
+            return time * time;
+        }
+
+        private static float OutQuad(float time)
+        {
+            return 1f - (1f - time) * (1f - time);
+        }
+
+        private static float InOutQuad(float time)
+        {
+            return time < 0.5f ? 2f * time * time : 1f - Mathf.Pow(-2f * time + 2f, 2f) / 2f;
         }
     }
 }

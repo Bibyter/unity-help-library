@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SharedObjectNs.Editor
 {
-    [CustomPropertyDrawer(typeof(SharedObject.ReferenceVar))]
+    [CustomPropertyDrawer(typeof(InjectionNode.ReferenceVar))]
     public sealed class ReferenceVarDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Bibyter
+namespace Bibyter.DependencyInjection
 {
     [DefaultExecutionOrder(-10000)]
     public sealed class SceneLinkRegistrator : MonoBehaviour

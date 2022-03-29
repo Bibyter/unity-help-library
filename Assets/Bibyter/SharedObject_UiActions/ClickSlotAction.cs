@@ -19,7 +19,7 @@ namespace Bibyter
 
         private void Awake()
         {
-            var sharedObject = GetComponentInParent<SharedObject>();
+            var sharedObject = GetComponentInParent<InjectionNode>();
             _clickEvent = sharedObject.GetExternalEvent<ClickSlotEvent>();
         }
 
