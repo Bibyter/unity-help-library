@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 [DefaultExecutionOrder(-100)]
-public sealed class InjectionNode : MonoBehaviour, IInjector
+public sealed class InjectionNode : MonoBehaviour, IInjector, ILinkRegistragor
 {
     #region
     public T GetExternalLink<T>() where T : class
@@ -36,6 +36,7 @@ public sealed class InjectionNode : MonoBehaviour, IInjector
 
     [SerializeField] ValueVar[] _valueVars;
     [SerializeField] ReferenceVar[] _referenceVars;
+    List<System.Object> _optionalLinks;
 
     public T GetInternalLink<T>() where T : class
     {
@@ -54,22 +55,36 @@ public sealed class InjectionNode : MonoBehaviour, IInjector
                     return _referenceVars[i].var as T;
             }
         }
-        else
+
+        for (int i = 0; i < _valueVars.Length; i++)
         {
-            for (int i = 0; i < _valueVars.Length; i++)
+            if (_valueVars[i].var is T && (!hasName || _valueVars[i].name == name))
+                return _valueVars[i].var as T;
+        }
+
+        if (_optionalLinks != null)
+        {
+            for (int i = 0; i < _optionalLinks.Count; i++)
             {
-                if (_valueVars[i].var is T && (!hasName || _valueVars[i].name == name))
-                    return _valueVars[i].var as T;
+                if (_optionalLinks[i] is T)
+                    return _optionalLinks[i] as T;
             }
         }
 
-        throw new System.Exception($"SharedObject.GetInternalLink(NotFoundLink, Type={typeof(T).Name}, Name={name})");
+        throw new System.Exception($"{nameof(InjectionNode)}.GetInternalLink(NotFoundLink, Type={typeof(T).Name}, Name={name})");
     }
 
-    [System.Obsolete]
+    /// <summary>
+    /// Нужен, что-бы регастрировать чистые классы с поведением.
+    /// Альнернативой может быть только какой-то контейнер для поведений, либо делать их как MonoBehaviour
+    /// </summary>
+    /// <param name="obj"></param>
     public void AddInterLink(System.Object obj)
     {
-        throw new System.Exception("SharedObject.AddInterLink(NotImplemention)");
+        if (_optionalLinks == null)
+            _optionalLinks = new List<object>();
+
+        _optionalLinks.Add(obj);
     }
     #endregion
 
@@ -124,4 +139,9 @@ public interface IInjector
 
     OrderableEvent<T> GetExternalEvent<T>();
     OrderableEvent<T> GetInternalEvent<T>();
+}
+
+public interface ILinkRegistragor
+{
+    void AddInterLink(System.Object obj);
 }

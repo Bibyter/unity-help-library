@@ -13,6 +13,7 @@ public sealed class TiledPlatform : MonoBehaviour
 
     [SerializeField] Vector3 _size = Vector3.one;
     [SerializeField] float _uvScale = 1f;
+    [SerializeField] Vector2 _uvOffset;
     [SerializeField] bool _needUpdateCollider = true;
 
 
@@ -119,7 +120,7 @@ public sealed class TiledPlatform : MonoBehaviour
 
         for (int i = 0; i < uv.Length; i++)
         {
-            uv[i] = CubePlatform_ApplySizeForUv(uv[i], validatedSize) * _uvScale;
+            uv[i] = CubePlatform_ApplySizeForUv(uv[i], validatedSize) * _uvScale + _uvOffset;
 
 #if UNITY_EDITOR
             if (_drawUv)
