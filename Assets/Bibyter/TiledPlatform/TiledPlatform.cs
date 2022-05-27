@@ -257,6 +257,11 @@ public sealed class TiledPlatform : MonoBehaviour
         _size.x = Mathf.Max(_size.x, 1f);
         _size.y = Mathf.Max(_size.y, 1f);
         _size.z = Mathf.Max(_size.z, 1f);
+
+        if (Application.isPlaying)
+        {
+            MeshUpdate();
+        }
     }
 
     [ContextMenu(nameof(FixScale))]
@@ -275,6 +280,8 @@ public sealed class TiledPlatform : MonoBehaviour
                 transform.localScale = Vector3.one;
                 break;
         }
-#endif
+
+        MeshUpdate();
     }
+#endif
 }
