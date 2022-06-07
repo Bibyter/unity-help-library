@@ -84,5 +84,14 @@ namespace Bibyter.Mathematics
         {
             return new Vector3Int32(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Min(a.z, b.z));
         }
+
+        public static readonly Vector3Int zero = new Vector3Int(0, 0, 0);
+        public static readonly Vector3Int one = new Vector3Int(1, 1, 1);
+        public static readonly Vector3Int up = new Vector3Int(0, 1, 0);
+        public static readonly Vector3Int down = new Vector3Int(0, -1, 0);
+        public static readonly Vector3Int left = new Vector3Int(-1, 0, 0);
+        public static readonly Vector3Int right = new Vector3Int(1, 0, 0);
+        public static readonly Vector3Int forward = new Vector3Int(0, 0, 1);
+        public static readonly Vector3Int back = new Vector3Int(0, 0, -1);
     }
 }
