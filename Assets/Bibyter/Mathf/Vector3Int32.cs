@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Bibyter.Mathematics
 {
+    [System.Serializable]
     public struct Vector3Int32
     {
         public int x, y, z;
@@ -53,6 +54,40 @@ namespace Bibyter.Mathematics
         public static Vector3Int32 operator /(in Vector3Int32 a, int b)
         {
             return new Vector3Int32(a.x / b, a.y / b, a.z / b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Vector3Int32 lhs, Vector3Int32 rhs)
+        {
+            return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Vector3Int32 lhs, Vector3Int32 rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object other)
+        {
+            if (!(other is Vector3Int32)) return false;
+
+            return Equals((Vector3Int32)other);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(in Vector3Int32 other)
+        {
+            return this == other;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+        {
+            var yHash = y.GetHashCode();
+            var zHash = z.GetHashCode();
+            return x.GetHashCode() ^ (yHash << 4) ^ (yHash >> 28) ^ (zHash >> 4) ^ (zHash << 28);
         }
 
         public Vector3 ToVector3()
