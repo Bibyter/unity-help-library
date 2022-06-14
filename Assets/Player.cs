@@ -6,67 +6,35 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    Camera _camera;
-    Camera _uiCamera;
+    public Transform circleCenter;
+    public float radius;
+    public float speed;
 
-    TakeDamage _takeDamage;
+    public float result;
 
+    public float _currentPosition;
 
-    OrderableEvent<int> _intEvent;
-
-    void Start()
+    private void OnDrawGizmos()
     {
-        _intEvent = new OrderableEvent<int>();
-
-        print(_intEvent.GetType().GetGenericArguments()[0]);
-
-        GetComponent<ILinkRegistragor>().AddInterLink(_takeDamage);
-        _camera = StaticInjector.GetLink<Camera>();
-        _uiCamera = StaticInjector.GetLink<Camera>("ui-camera");
+        Gizmos.DrawWireSphere(circleCenter.position, Vector2.Distance(circleCenter.position, transform.position));
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
-    }
-}
+        var position = (Vector2)transform.position;
+        var circleCenterPosition = (Vector2)circleCenter.position;
 
-public sealed class TakeDamage
-{
-    IntVariable _health;
 
-    TakeDamage _takeDamage;
+        var rad = Bibyter.Mathematics.Circle.DirectionXYToRad(position - circleCenterPosition);
 
-    Bibyter.CustomEvent.OrderableEvent<int> _event;
+        var circle = new Bibyter.Mathematics.Circle(Vector2.Distance(position, circleCenterPosition));
 
-    void Awake(IInjector injector)
-    {
-        _takeDamage = injector.GetInternalLink<TakeDamage>();
-        _health = injector.GetInternalLink<IntVariable>("health");
-        _event = injector.GetInternalLink<Bibyter.CustomEvent.OrderableEvent<int>>();
-    }
 
-    void Handle(int value)
-    {
-        _health.value -= value;
-    }
-}
+        rad = circle.ApplyLinearSpeed(rad, speed * Time.deltaTime);
 
-public sealed class TakeDamage2
-{
-    IntVariable _health;
+        var resultPosition = circle.GetPoint(rad) + circleCenterPosition;
 
-    TakeDamage _takeDamage;
 
-    void Awake(IInjector injector)
-    {
-        _takeDamage = injector.GetInternalLink<TakeDamage>();
-        _health = injector.GetInternalLink<IntVariable>("health");
-    }
-
-    void Handle(int value)
-    {
-        _health.value -= value;
+        transform.position = resultPosition;
     }
 }
