@@ -34,6 +34,11 @@ namespace Bibyter.Mathematics
             return linearSpeed / radius;
         }
 
+        public static float ConvertLinearToAngularSpeed(float linearSpeed, float radius)
+        {
+            return linearSpeed / radius;
+        }
+
         public float ConvertAngulaToLinearSpeed(float angularSpeed)
         {
             return angularSpeed * radius;
@@ -50,7 +55,7 @@ namespace Bibyter.Mathematics
         /// <summary>
         /// ѕолучить нормализованное направление
         /// </summary>
-        public Vector2 GetDirection(float rad)
+        public static Vector2 GetDirection(float rad)
         {
             return new Vector2(Mathf.Sin(rad), Mathf.Cos(rad));
         }
