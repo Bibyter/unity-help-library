@@ -15,7 +15,7 @@ namespace Bibyter.PhysicsNs.FrictionPoint
         {
             [SerializeField] Vector2 _pivot;
 
-            public void Update(Rigidbody2D rigidbody, Transform transform)
+            public void Update(Rigidbody2D rigidbody, Transform transform, int frictionPointCount)
             {
                 // уравнение трения
                 // нужно найти направление трения и величину (магнитуду)
@@ -25,15 +25,18 @@ namespace Bibyter.PhysicsNs.FrictionPoint
                 // N = m*g
                 // norm(v) - направление трения, нормализованная скорость, вектор
 
-                const float mu = 0.5f;
-                float N = rigidbody.mass/* * 9.81f*/; // почему-то в unity умножать на гравитацию не надо
+                const float mu = 0.9f;
+                float N = (rigidbody.mass * (1f / frictionPointCount)) * 10f; // почему-то в unity умножать на гравитацию не надо
 
-                Vector2 dir = rigidbody.GetRelativePointVelocity(_pivot);
-                dir.Normalize();
+                Vector2 worldFrictionPoint = transform.TransformPoint(_pivot);
+
+                Vector2 dir = rigidbody.GetPointVelocity(worldFrictionPoint);
+
+                if (dir.magnitude > 1f)
+                    dir.Normalize();
 
                 Vector2 frictionForce = -1f * mu * N * dir;
 
-                Vector2 worldFrictionPoint = transform.TransformPoint(_pivot);
                 rigidbody.AddForceAtPosition(frictionForce, worldFrictionPoint);
             }
 
@@ -66,7 +69,7 @@ namespace Bibyter.PhysicsNs.FrictionPoint
         {
             for (int i = 0; i < _frictionPoints.Length; i++)
             {
-                _frictionPoints[i].Update(_rigidbody, transform);
+                _frictionPoints[i].Update(_rigidbody, transform, _frictionPoints.Length);
             }
         }
     }
