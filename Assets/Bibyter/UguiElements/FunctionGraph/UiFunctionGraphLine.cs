@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Bibyter.UiElements.FunctionGraph
 {
+    [DefaultExecutionOrder(-1)]
     public sealed class UiFunctionGraphLine : MonoBehaviour
     {
         [SerializeField] RectTransform _lineRendererRect;
